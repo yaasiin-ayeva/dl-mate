@@ -1,3 +1,4 @@
+import DlMate from './dlmate';
 export {
     TikTokDownloadResult,
     YouTubeDownloadFormat,
@@ -7,5 +8,5 @@ export {
     Platform,
     DlMateConfig
 } from './types';
-export { default as DlMate } from './dlmate';
 export { validate as validateUrl } from './validator';
+export default DlMate;

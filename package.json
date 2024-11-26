@@ -6,13 +6,14 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "start": "ts-node src/index.ts",
-    "build": "node -r esbuild-register esbuild.config.ts ; npm run types",
+    "build": "npm run clean && node -r esbuild-register esbuild.config.ts && npm run types",
     "types": "tsc --declaration --emitDeclarationOnly --outDir dist",
     "prepare": "npm run build",
     "dev": "node -r esbuild-register src/example.ts",
     "example": "ts-node src/example.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "clean": "rimraf dist",
     "test": "jest",
     "coverage": "jest --coverage",
     "coverage:html": "jest --coverage --coverageReporters=html"
@@ -47,6 +48,7 @@
     "esbuild-node-externals": "^1.15.0",
     "esbuild-register": "^3.6.0",
     "jest": "^29.7.0",
+    "rimraf": "^6.0.1",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2"
