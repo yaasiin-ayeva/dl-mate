@@ -1,9 +1,9 @@
 import { Platform } from "./types";
 
 const URL_PATTERNS: { [key in Platform]: RegExp } = {
-    tiktok: /^(https?:\/\/)?(www\.)?(tiktok\.com)\/.+$/,
+    tiktok: /^(https?:\/\/)?(www\.)?(tiktok\.com|vm\.tiktok\.com)\/.+$/,
     youtube: /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/,
-    x: /^(https?:\/\/)?(www\.)?(x\.com)\/.+$/,
+    x: /^(https?:\/\/)?(www\.)?(x\.com|twitter\.com)\/.+$/,
     linkedin: /^(https?:\/\/)?(www\.)?(linkedin\.com)\/.+$/,
 };
 
