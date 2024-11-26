@@ -1,6 +1,6 @@
 {
   "name": "dl-mate",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A robust Node.js library for downloading content from various social media platforms including TikTok, Instagram, YouTube, and more. Built with reliability, caching, and error handling in mind.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
