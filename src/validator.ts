@@ -1,9 +1,10 @@
-import { Platform } from "./dlmate";
+import { Platform } from "./types";
 
 const URL_PATTERNS: { [key in Platform]: RegExp } = {
     tiktok: /^(https?:\/\/)?(www\.)?(tiktok\.com)\/.+$/,
     youtube: /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/,
-    instagram: /^(https?:\/\/)?(www\.)?(instagram\.com)\/.+$/,
+    x: /^(https?:\/\/)?(www\.)?(x\.com)\/.+$/,
+    linkedin: /^(https?:\/\/)?(www\.)?(linkedin\.com)\/.+$/,
 };
 
 export function validate(url: string, platform: Platform): boolean {
