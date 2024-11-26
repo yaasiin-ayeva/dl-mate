@@ -8,8 +8,11 @@
     "outDir": "./dist",
     "resolveJsonModule": true,
     "declaration": true,
+    "declarationMap": false,
+    "sourceMap": false,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    "lib": ["es2020", "dom"],
     "types": [
       "node",
       "jest"
