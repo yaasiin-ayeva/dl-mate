@@ -1,48 +1,18 @@
 import axios, { type AxiosInstance } from 'axios';
-import { load as cheerioLoad } from 'cheerio';
+import { CheerioAPI, load as cheerioLoad } from 'cheerio';
 import NodeCache from 'node-cache';
-import axiosRetry from 'axios-retry';
+// import axiosRetry from 'axios-retry';
 import { validate as validateUrl } from './validator';
+import {
+    DlMateConfig,
+    Platform,
+    TikTokDownloadResult,
+    YouTubeDownloadFormat,
+    LinkedInDownloadResult,
+    XDownloadResult,
+    LinkedInVideoData,
+} from './types';
 
-interface DlMateConfig {
-    timeout?: number;
-    retries?: number;
-    cacheTime?: number;
-    maxCacheSize?: number;
-}
-
-export type Platform = "tiktok" | "instagram" | "youtube";
-
-interface TikTokDownloadResult {
-    title: string;
-    title_audio: string;
-    thumbnail: string;
-    video: string[];
-    audio: string[];
-    metadata: {
-        duration: number;
-        created_at: number;
-        views: number;
-        likes: number;
-        shares: number;
-    };
-}
-
-interface InstagramDownloadResult {
-    type: 'reel' | 'post';
-    downloads: {
-        quality: string;
-        thumbnail: string;
-        url: string;
-        size: string;
-    }[];
-}
-
-interface YouTubeDownloadFormat {
-    url: string;
-    quality: string;
-    type: string;
-}
 
 export default class DlMate {
     private config: DlMateConfig;
@@ -135,61 +105,6 @@ export default class DlMate {
         });
     }
 
-    async downloadInstagram(url: string): Promise<InstagramDownloadResult> {
-        return this.download(url, 'instagram', async (validUrl) => {
-            const response = await this.axios.post(
-                'https://snapsave.app/action.php',
-                { url: validUrl },
-                {
-                    headers: {
-                        'content-type': 'application/x-www-form-urlencoded',
-                        origin: 'https://snapsave.app',
-                        referer: 'https://snapsave.app/id',
-                    },
-                }
-            );
-
-            const $ = cheerioLoad(response.data);
-            const results: InstagramDownloadResult['downloads'] = [];
-
-            $('.download-items__thumb, article.media > figure').each((_, element) => {
-                const thumbnail = $(element).find('img').attr('src');
-                const downloadBtn = $(element).next('.download-items__btn');
-
-                if (!thumbnail) return;
-
-                downloadBtn.find('a').each((_, link) => {
-                    const downloadUrl = $(link).attr('href');
-                    if (!downloadUrl) return;
-
-                    const finalUrl = downloadUrl.startsWith('http')
-                        ? downloadUrl
-                        : `https://snapsave.app${downloadUrl}`;
-                    const quality = $(link).text().trim();
-
-                    console.log("Downloading:", finalUrl);
-                    console.log("Download URL:", downloadUrl);
-
-                    results.push({
-                        quality,
-                        thumbnail,
-                        url: finalUrl,
-                        size: $(link).closest('td').prev().text().trim(),
-                    });
-                });
-            });
-
-            if (!results.length) {
-                throw new Error('No downloadable content found');
-            }
-
-            return {
-                type: url.includes('/reel/') ? 'reel' : 'post',
-                downloads: results,
-            };
-        });
-    }
-
     async downloadYouTube(url: string): Promise<{ videoId: string; formats: YouTubeDownloadFormat[] }> {
         return this.download(url, 'youtube', async (validUrl) => {
             const videoId = validUrl.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:shorts\/|watch\?v=|music\?v=|embed\/|v\/|.+\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/)?.[1];
@@ -239,6 +154,140 @@ export default class DlMate {
                 videoId,
                 formats: formats.filter((f) => f?.url),
             };
+        });
+    }
+
+    async downloadX(url: string): Promise<XDownloadResult> {
+        try {
+            // Multiple download services for redundancy
+            const downloadServices = [
+                'https://twdown.net/download.php',
+                'https://twdownload.dev/download'
+            ];
+
+            for (const service of downloadServices) {
+                try {
+                    const data = new URLSearchParams();
+                    data.append('URL', url);
+
+                    const response = await this.axios.post(
+                        service,
+                        data,
+                        {
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'Referer': service
+                            }
+                        }
+                    );
+
+                    const $ = cheerioLoad(response.data);
+                    const title = $('div:nth-child(1) > div:nth-child(2) > p').text().trim();
+
+                    const downloads: XDownloadResult['downloads'] = [];
+
+                    // Try multiple selectors for download links
+                    const hdLink = $('tr:nth-child(1) > td:nth-child(4) > a').attr('href') ||
+                        $('div:nth-child(1) > div.download-btn > a').attr('href');
+                    const sdLink = $('tr:nth-child(2) > td:nth-child(4) > a').attr('href') ||
+                        $('div:nth-child(2) > .download-btn > a').attr('href');
+
+                    if (hdLink) downloads.push({ quality: 'HD', url: hdLink });
+                    if (sdLink) downloads.push({ quality: 'SD', url: sdLink });
+
+                    // If we found downloads, return the result
+                    if (downloads.length) {
+                        return {
+                            title,
+                            downloads,
+                            thumbnail: $('img.thumbnail').attr('src') ||
+                                $('div.video-thumbnail img').attr('src')
+                        };
+                    }
+                } catch (serviceError) {
+                    // Continue to next service if one fails
+                    console.warn(`Twitter download service ${service} failed:`, serviceError);
+                }
+            }
+
+            throw new Error('No download links found');
+        } catch (error: any) {
+            throw new Error(`Twitter download failed: ${error.message}`);
+        }
+    }
+
+    async downloadLinkedIn(url: string): Promise<LinkedInDownloadResult> {
+        return this.download(url, 'linkedin', async (validUrl) => {
+            const fetchHtml = async (validUrl: string): Promise<any> => {
+                try {
+                    const response = await axios.get(validUrl);
+                    const html = cheerioLoad(response.data);
+                    if (!html) {
+                        throw new Error("Invalid content");
+                    }
+                    return html;
+                } catch (error: any) {
+                    throw new Error(`Unable to fetch content from LinkedIn: ${error.message}`);
+                }
+            };
+
+            const getMetadata = (url: string, html: CheerioAPI): { quality: string | null; title: string | null } => {
+                const pattern = /\/(\w*?)-(\w*?)-(\w*?)-/;
+                const matches = url.match(pattern);
+
+                const titleElement = html("meta[property='og:title']").attr("content") ||
+                    html("title").text();
+                const title = titleElement ? titleElement.trim() : null;
+
+                return {
+                    quality: matches ? matches[2] : null,
+                    title: title,
+                };
+            };
+
+            let videoTitle: string | null = null;
+
+            const extractVideos = async (validUrl: string): Promise<LinkedInVideoData[]> => {
+                const html = await fetchHtml(validUrl);
+                const videoElements = html("video[data-sources]");
+                const results: LinkedInVideoData[] = [];
+
+                videoElements.each((_: any, element: any) => {
+                    const ve = html(element).attr("data-sources");
+                    if (ve) {
+                        try {
+                            const parsedVideos = JSON.parse(ve);
+                            parsedVideos.forEach((videoObj: { src: string }) => {
+                                if (videoObj.src) {
+                                    const metadata = getMetadata(videoObj.src, html);
+                                    videoTitle = metadata.title;
+                                    const data = {
+                                        url: videoObj.src,
+                                        quality: metadata.quality,
+                                    };
+                                    results.push(data);
+                                }
+                            });
+                        } catch (jsonError) {
+                            console.warn("Failed to parse video sources:", jsonError);
+                        }
+                    }
+                });
+
+                return results;
+            };
+
+            const videos = await extractVideos(validUrl);
+            if (!videos.length) {
+                throw new Error("No videos found on the LinkedIn page.");
+            }
+
+            const videoData: LinkedInDownloadResult = {
+                title: videoTitle ?? 'Untitled',
+                downloads: videos,
+            };
+
+            return videoData;
         });
     }
 

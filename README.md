@@ -1,18 +1,19 @@
 # dl-mate
-A robust Node.js library for downloading content from various social media platforms including TikTok, Instagram, YouTube, and more. Built with reliability, caching, and error handling in mind.
+A Node.js library for downloading content from various social media platforms including TikTok, LinkedIn, YouTube, X (Twitter), and more. Built with reliability and caching in mind.
 
 ## Features
 
 - 🚀 Support for multiple platforms:
-  - TikTok videos and music
-  - Instagram posts, reels, and stories
+  - TikTok videos, music, and video metadata
+  - LinkedIn Video posts
+  - X (Twitter) videos
   - YouTube videos (multiple quality options)
 - 💾 Built-in caching system
 - 🔄 Automatic retries with exponential backoff
 - ✅ Comprehensive URL validation
 - 🛡️ Error handling and timeout management
 - 📊 Cache statistics and management
-- 🧪 Thoroughly tested with Jest
+<!-- - 🧪 Thoroughly tested with Jest -->
 
 ## Installation
 
@@ -22,14 +23,9 @@ npm install dl-mate
 yarn add dl-mate
 ```
 
-<!-- Required peer dependencies:
-```bash
-npm install axios axios-retry node-cache cheerio
-``` -->
-
 ## Quick Start
 
-```javascript
+```typescript
 import DlMate from 'dl-mate';
 
 // Initialize with default config
@@ -38,7 +34,7 @@ const mate = new DlMate();
 // Download TikTok video
 try {
     const result = await mate.downloadTikTok(
-        'https://www.tiktok.com/@user/video/1234567890'
+        'https://www.tiktok.com/@champ_marco/video/7424898414418087173?is_from_webapp=1&sender_device=pc&web_id=7367327613927622150'
     );
     console.log(result);
 } catch (error) {
@@ -50,7 +46,7 @@ try {
 
 The downloader can be initialized with custom configuration:
 
-```javascript
+```typescript
 const mate = new DlMate({
     timeout: 30000,     // Request timeout in ms
     retries: 3,         // Number of retry attempts
@@ -60,60 +56,58 @@ const mate = new DlMate({
 ```
 
 ## API Reference
+TODO
 
 ### TikTok Downloads
 
-```javascript
+```typescript
 const result = await mate.downloadTikTok(url);
 ```
 
 Returns:
-```javascript
+```typescript
 {
-    title: string,
-    title_audio: string,
-    thumbnail: string,
-    video: string[],
-    audio: string[],
+    title: string;
+    title_audio: string;
+    thumbnail: string;
+    video: string[];
+    audio: string[];
     metadata: {
-        duration: number,
-        created_at: string,
-        views: number,
-        likes: number,
-        shares: number
-    }
+        duration: number;
+        created_at: number;
+        views: number;
+        likes: number;
+        shares: number;
+    };
 }
 ```
 
-### Instagram Downloads
+### X (Twitter) Downloads
 
-```javascript
-const result = await mate.downloadInstagram(url);
+```typescript
+const result = await mate.downloadX(url);
 ```
 
 Returns:
-```javascript
+```typescript
 {
-    type: 'post' | 'reel',
-    downloads: [
-        {
-            quality: string,
-            thumbnail: string,
-            url: string,
-            size: string
-        }
-    ]
+    title?: string;
+    downloads: {
+        quality: 'HD' | 'SD';
+        url: string;
+    }[];
+    thumbnail?: string;
 }
 ```
 
 ### YouTube Downloads
 
-```javascript
+```typescript
 const result = await mate.downloadYouTube(url);
 ```
 
 Returns:
-```javascript
+```typescript
 {
     videoId: string,
     formats: [
@@ -126,9 +120,28 @@ Returns:
 }
 ```
 
+### LinkedIn Downloads
+
+```typescript
+const result = await mate.downloadLinkedIn(url);
+```
+
+Returns:
+```typescript
+{
+    title: string,
+    downloads: [
+        {
+            url: string,
+            quality: string | null,
+        }
+    ]
+}
+```
+
 ### Cache Management
 
-```javascript
+```typescript
 // Clear cache for specific URL
 mate.clearCache('tiktok', url);
 
@@ -146,7 +159,7 @@ const stats = mate.getCacheStats();
 
 The library throws descriptive errors that can be caught and handled:
 
-```javascript
+```typescript
 try {
     const result = await mate.downloadTikTok(url);
 } catch (error) {
@@ -183,6 +196,16 @@ Run tests with coverage:
 ```bash
 npm run test:coverage
 ```
+
+## Credits
+
+This project was built by [yaasiin-ayeva](https://github.com/yaasiin-ayeva) and some functionnalities uses third-party apis and websites.
+
+- [TikVM](tikwm.com) for TikTok downloads
+- [SaveServall](https://saveservall.xyz) for YouTube downloads
+- [Twdown.net](https://twdown.net) & [twdownload.dev](https://twdownload.dev) for X downloads
+
+Dl-Mate uses these third-party services for downloading content but still have its own standalone method of downloading from some plateforms.
 
 ## License
 
