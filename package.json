@@ -3,9 +3,10 @@
   "version": "1.0.2",
   "description": "A robust Node.js library for downloading content from various social media platforms including TikTok, Instagram, YouTube, and more. Built with reliability, caching, and error handling in mind.",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "start": "ts-node src/index.ts",
-    "build": "node -r esbuild-register esbuild.config.ts",
+    "build": "node -r esbuild-register esbuild.config.ts ; npm run types",
     "types": "tsc --declaration --emitDeclarationOnly --outDir dist",
     "prepare": "npm run build",
     "dev": "node -r esbuild-register src/example.ts",
@@ -21,7 +22,6 @@
     "README.md",
     "LICENSE"
   ],
-  "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yaasiin-ayeva/dl-mate.git"
