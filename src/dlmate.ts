@@ -11,6 +11,7 @@ import {
     LinkedInDownloadResult,
     XDownloadResult,
     LinkedInVideoData,
+    PinterestDownloadResult,
 } from './types';
 
 
@@ -159,7 +160,6 @@ export default class DlMate {
 
     async downloadX(url: string): Promise<XDownloadResult> {
         try {
-            // Multiple download services for redundancy
             const downloadServices = [
                 'https://twdown.net/download.php',
                 'https://twdownload.dev/download'
@@ -186,7 +186,6 @@ export default class DlMate {
 
                     const downloads: XDownloadResult['downloads'] = [];
 
-                    // Try multiple selectors for download links
                     const hdLink = $('tr:nth-child(1) > td:nth-child(4) > a').attr('href') ||
                         $('div:nth-child(1) > div.download-btn > a').attr('href');
                     const sdLink = $('tr:nth-child(2) > td:nth-child(4) > a').attr('href') ||
@@ -195,7 +194,6 @@ export default class DlMate {
                     if (hdLink) downloads.push({ quality: 'HD', url: hdLink });
                     if (sdLink) downloads.push({ quality: 'SD', url: sdLink });
 
-                    // If we found downloads, return the result
                     if (downloads.length) {
                         return {
                             title,
@@ -205,7 +203,6 @@ export default class DlMate {
                         };
                     }
                 } catch (serviceError) {
-                    // Continue to next service if one fails
                     console.warn(`Twitter download service ${service} failed:`, serviceError);
                 }
             }
@@ -288,6 +285,44 @@ export default class DlMate {
             };
 
             return videoData;
+        });
+    }
+
+
+    // In the DlMate class, add this method
+    async downloadPinterest(url: string): Promise<PinterestDownloadResult> {
+        return this.download(url, 'pinterest', async (validUrl) => {
+            const response = await this.axios.get(validUrl, {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
+                }
+            });
+
+            const $ = cheerioLoad(response.data);
+
+            // Try to find video
+            const video = $('video[src]').first().attr('src');
+            const videoUrl = video ?
+                video.replace("/hls/", "/720p/").replace(".m3u8", ".mp4") :
+                null;
+
+            // Try to find title and description
+            const title = $('meta[property="og:title"]').attr('content') ||
+                $('title').text().trim() ||
+                null;
+
+            // Try to find thumbnail
+            const thumbnail = $('meta[property="og:image"]').attr('content') || null;
+
+            return {
+                title,
+                video: videoUrl,
+                thumbnail,
+                metadata: {
+                    description: $('meta[property="og:description"]').attr('content') || undefined
+                }
+            };
         });
     }
 

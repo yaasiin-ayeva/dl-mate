@@ -5,6 +5,7 @@ const URL_PATTERNS: { [key in Platform]: RegExp } = {
     youtube: /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/,
     x: /^(https?:\/\/)?(www\.)?(x\.com|twitter\.com)\/.+$/,
     linkedin: /^(https?:\/\/)?(www\.)?(linkedin\.com)\/.+$/,
+    pinterest: /^(?:https?:\/\/)?(?:www\.)?pinterest\.com|pin\.it\/.+$/i,
 };
 
 export function validate(url: string, platform: Platform): boolean {

@@ -12,6 +12,7 @@ async function main() {
     const youtubeUrl = 'https://youtube.com/shorts/TfBtqDa2Yd8?si=voKSnR9eL8UShq4t';
     const xUrl = "https://x.com/rough__sea/status/1859685138323628316";
     const linkedinUrl = "https://www.linkedin.com/feed/update/urn:li:activity:7267102275511222273?utm_source=share&utm_medium=member_desktop";
+    const pinterestUrl = "https://pin.it/4tH5H49FT";
     // const facebookUrl = "https://web.facebook.com/openai/videos/248478235847140";
     // const instagramUrl = 'https://www.instagram.com/reel/DBbjz5wvtXp/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==';
 
@@ -27,6 +28,9 @@ async function main() {
         
         const linkedinData = await mate.downloadLinkedIn(linkedinUrl);
         console.log('LinkedIn Data:', linkedinData);
+
+        const pinterestData = await mate.downloadPinterest(pinterestUrl);
+        console.log('Pinterest Data:', pinterestData);
 
         // const instagramData = await mate.downloadInstagram(instagramUrl);
         // console.log('Instagram Data:', instagramData);

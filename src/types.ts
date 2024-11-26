@@ -5,7 +5,7 @@ export interface DlMateConfig {
     maxCacheSize?: number;
 }
 
-export type Platform = 'tiktok' | 'youtube' | 'x' | 'linkedin';
+export type Platform = 'tiktok' | 'youtube' | 'x' | 'linkedin' | 'pinterest';
 
 export interface XDownloadResult {
     title?: string;
@@ -45,4 +45,13 @@ export interface LinkedInVideoData {
 export interface LinkedInDownloadResult {
     title: string | null;
     downloads: LinkedInVideoData[];
+}
+
+export interface PinterestDownloadResult {
+    title: string | null;
+    video: string | null;
+    thumbnail: string | null;
+    metadata?: {
+        description?: string;
+    };
 }

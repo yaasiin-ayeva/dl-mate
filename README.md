@@ -7,13 +7,13 @@ A Node.js library for downloading content from various social media platforms in
   - TikTok videos, music, and video metadata
   - LinkedIn Video posts
   - X (Twitter) videos
+  - Pinterest videos
   - YouTube videos (multiple quality options)
 - 💾 Built-in caching system
 - 🔄 Automatic retries with exponential backoff
 - ✅ Comprehensive URL validation
 - 🛡️ Error handling and timeout management
 - 📊 Cache statistics and management
-<!-- - 🧪 Thoroughly tested with Jest -->
 
 ## Installation
 
@@ -56,7 +56,16 @@ const mate = new DlMate({
 ```
 
 ## API Reference
-TODO
+
+The library supports currently downloading content from the following platforms:
+
+| Platform | Function | Is Standalone (ie. not using any third-party service) |
+| --- | --- | --- |
+| LinkedIn | `downloadLinkedIn` | ✅ |
+| Pinterest | `downloadPinterest` | ✅ |
+| TikTok | `downloadTikTok` | 🔜 |
+| X (Twitter) | `downloadX` | 🔜 |
+| YouTube | `downloadYouTube` | 🔜 |
 
 ### TikTok Downloads
 
@@ -136,6 +145,24 @@ Returns:
             quality: string | null,
         }
     ]
+}
+```
+
+### Pinterest Downloads
+
+```typescript
+const result = await mate.downloadPinterest(url);
+```
+
+Returns:
+```typescript
+{
+    title: string | null;
+    video: string | null;
+    thumbnail: string | null;
+    metadata?: {
+        description?: string;
+    };
 }
 ```
 
